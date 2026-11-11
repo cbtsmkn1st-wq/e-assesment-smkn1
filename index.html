@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-assesment - SMKN 1 Sengah Temila</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Styles for Print output */
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .container-main { max-width: 100% !important; margin: 0 !important; padding: 0 !important; shadow: none !important; }
+            #hasilRender { border: none !important; padding: 0 !important; font-size: 11pt !important; }
+            .page-break { page-break-before: always; }
+        }
+        
+        /* Markdown Style inside Result Box */
+        .markdown-body h1 { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.25rem; }
+        .markdown-body h2 { font-size: 1.25rem; font-weight: 700; color: #334155; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        .markdown-body h3 { font-size: 1.1rem; font-weight: 600; color: #475569; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown-body p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .markdown-body ul, .markdown-body ol { margin-left: 1.5rem; margin-bottom: 0.75rem; }
+        .markdown-body ul { list-style-type: disc; }
+        .markdown-body ol { list-style-type: decimal; }
+        .markdown-body li { margin-bottom: 0.25rem; }
+        .markdown-body table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem; font-size: 0.9rem; }
+        .markdown-body th, .markdown-body td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
+        .markdown-body th { background-color: #f1f5f9; font-weight: 600; }
+        .markdown-body blockquote { border-left: 4px solid #d97706; padding-left: 1rem; color: #475569; italic; margin: 1rem 0; }
+        .markdown-body code { background-color: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.875em; }
+    </style>
+</head>
+<body class="h-full text-slate-800 antialiased flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Main Header / Navbar -->
+    <header class="no-print bg-slate-900 text-white shadow-lg border-b border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-700 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        e-assesment <span class="bg-amber-500/20 text-amber-400 text-xs px-2 py-0.5 rounded border border-amber-500/30">v2.5 AI</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">SMKN 1 Sengah Temila — Platform Perangkat & Generator Soal Otomatis</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Actions -->
+            <div class="flex items-center gap-2 text-xs">
+                <button onclick="loadPreset('otomotif')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-car text-amber-400"></i> Preset Otomotif
+                </button>
+                <button onclick="loadPreset('tkj')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-laptop-code text-blue-400"></i> Preset RPL/TKJ
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- Print Header (Visible only when printing) -->
+        <div class="hidden print-only mb-6 text-center border-b-2 border-black pb-4">
+            <h3 class="text-sm font-bold uppercase tracking-wide">PEMERINTAH PROVINSI KALIMANTAN BARAT</h3>
+            <h3 class="text-sm font-bold uppercase tracking-wide">DINAS PENDIDIKAN DAN KEBUDAYAAN</h3>
+            <h1 class="text-xl font-extrabold uppercase">SMK NEGERI 1 SENGAH TEMILA</h1>
+            <p class="text-xs">Jl. Raya Senakin, Dsn. Gundaleng Alian, Kec. Sengah Temila, Kab. Landak, Kode pos. 79356</p>
+            <p class="text-xs">Email: smkn1sengahtemilakablandak@gmail.com | Web: http://smkn1sengahtemila.sch.id</p>
+            <div class="mt-4 border-t border-black pt-2 flex justify-between text-xs font-semibold">
+                <span id="printGuru">Guru Pengampu: -</span>
+                <span id="printMapel">Mata Pelajaran: -</span>
+                <span id="printKelas">Kelas/Semester: -</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Form Section -->
+            <section class="no-print lg:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                
+                <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                    <h2 class="font-bold text-slate-800 flex items-center gap-2 text-lg">
+                        <i class="fa-solid fa-sliders text-amber-600"></i> Parameter Asesmen
+                    </h2>
+                    <span class="text-xs text-slate-400 font-medium">*Wajib diisi</span>
+                </div>
+
+                <form id="assessmentForm" onsubmit="event.preventDefault(); generateSoal();" class="space-y-4">
+
+                    <!-- Nama Guru Input -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Guru / Penyusun *</label>
+                        <input type="text" id="namaGuru" required placeholder="Contoh: Ahmad Fauzi, S.Pd." 
+                            class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition" />
+                    </div>
+
+                    <!-- Mapel -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">1. Mata Pelajaran *</label>
+                        <input type="text" id="mapel" required placeholder="Contoh: Pemrograman Web & Perangkat Bergerak" 
+                            class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition" />
+                    </div>
+
+                    <!-- Topik / Materi -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">2. Topik / Materi Spesifik *</label>
+                        <input type="text" id="topik" required placeholder="Contoh: Interaksi REST API dan Integrasi UI" 
+                            class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition" />
+                    </div>
+
+                    <!-- Jenjang & Semester Row -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">3. Jenjang / Kelas *</label>
+                            <select id="kelas" class="w-full text-xs sm:text-sm px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                <option value="Kelas 10 (Fase E)">SMK - Kelas 10 (Fase E)</option>
+                                <option value="Kelas 11 (Fase F)" selected>SMK - Kelas 11 (Fase F)</option>
+                                <option value="Kelas 12 (Fase F)">SMK - Kelas 12 (Fase F)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">4. Semester *</label>
+                            <select id="semester" class="w-full text-xs sm:text-sm px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                <option value="Ganjil">Semester Ganjil</option>
+                                <option value="Genap">Semester Genap</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- CP / Indikator with Auto Fill AI Button -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-xs font-semibold text-slate-700">5. Capaian Pembelajaran (CP) / Indikator *</label>
+                            <button type="button" onclick="autoGenerateCP()" id="btnAutoCP" 
+                                class="text-[11px] font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles text-sky-600"></i> Auto-Fill CP
+                            </button>
+                        </div>
+                        <textarea id="cpInput" rows="3" placeholder="Klik 'Auto-Fill CP' untuk membuat otomatis dari topik atau ketik indikator khusus di sini..."
+                            class="w-full text-xs sm:text-sm p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"></textarea>
+                    </div>
+
+                    <!-- Jenis & Kesulitan & Jumlah Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-1">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">6. Bentuk Soal</label>
+                            <select id="tipeSoal" class="w-full text-xs px-2.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                <option value="Pilihan Ganda (5 Opsi A-E)">Pilihan Ganda (A-E)</option>
+                                <option value="Isian Singkat">Isian Singkat</option>
+                                <option value="Uraian / Essay">Uraian / Essay</option>
+                                <option value="Campuran (PG & Uraian)">Campuran (PG + Essay)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-1">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">7. Kesulitan</label>
+                            <select id="kesulitan" class="w-full text-xs px-2.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                <option value="Kombinasi (LOTS + MOTS + HOTS)">Seimbang (LOTS-HOTS)</option>
+                                <option value="Dominan HOTS (Penalaran Tinggi)">Dominan HOTS</option>
+                                <option value="Praktik Kasus Industri / Terapan">Kasus Industri (Vokasi)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-1">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">8. Jumlah Soal</label>
+                            <input type="number" id="jumlah" value="5" min="1" max="50" 
+                                class="w-full text-xs px-2.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition" />
+                        </div>
+                    </div>
+
+                    <!-- Action Submit Button -->
+                    <button type="submit" id="btnSubmit" 
+                        class="w-full mt-2 py-3.5 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-amber-500/25 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Generate Naskah Soal & Asesmen</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Output Section -->
+            <section class="lg:col-span-7 flex flex-col h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[500px]">
+                    
+                    <!-- Output Header Bar -->
+                    <div class="no-print bg-slate-100/80 px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-wrap gap-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-file-contract text-amber-600 text-lg"></i>
+                            <h3 class="font-bold text-slate-800 text-base">Hasil Perangkat Asesmen</h3>
+                        </div>
+
+                        <!-- Output Controls (Copy, Word Download, Print) -->
+                        <div id="outputControls" class="flex items-center gap-2 opacity-50 pointer-events-none transition-opacity duration-200 flex-wrap">
+                            <button onclick="copyHasil()" title="Salin Teks" 
+                                class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-copy text-slate-500"></i> Salin
+                            </button>
+                            <button onclick="downloadWord()" title="Download sebagai Document Word" 
+                                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-file-word"></i> Download Word
+                            </button>
+                            <button onclick="cetakDokumen()" title="Cetak / Save as PDF" 
+                                class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-print"></i> Cetak / PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Content Output Area -->
+                    <div class="p-6 flex-1 bg-white relative">
+                        
+                        <!-- Empty Placeholder State -->
+                        <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 text-slate-400">
+                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-300 text-3xl mb-4">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-600 mb-1">Belum Ada Naskah Generated</h4>
+                            <p class="text-xs max-w-sm text-slate-400">Isi parameter mata pelajaran di sebelah kiri, lalu klik <strong>Generate Naskah Soal</strong> untuk menyusun instrumen asesmen otomatis.</p>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="loadingState" class="hidden absolute inset-0 bg-white/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-8 text-center">
+                            <div class="relative w-16 h-16 mb-4">
+                                <div class="absolute inset-0 rounded-full border-4 border-amber-200"></div>
+                                <div class="absolute inset-0 rounded-full border-4 border-amber-600 border-t-transparent animate-spin"></div>
+                            </div>
+                            <h4 id="loadingText" class="font-bold text-slate-800 text-base mb-1">Menghubungkan AI Gemini...</h4>
+                            <p class="text-xs text-slate-500 max-w-xs">Sedang menyusun Kisi-kisi, Naskah Soal, Kunci Jawaban, dan Rubrik Asesmen...</p>
+                        </div>
+
+                        <!-- Rendered Result Container -->
+                        <div id="hasilRender" class="markdown-body hidden text-slate-800 leading-relaxed text-sm">
+                            <!-- AI Content will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="no-print mt-auto border-t border-slate-200 bg-white py-4 px-6 text-center text-xs text-slate-500">
+        <p>© 2026 e-assesment System — Tim Kurikulum Merdeka SMKN 1 Sengah Temila. Powered by Gemini AI.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Preset Functionality
+        function loadPreset(type) {
+            if (type === 'otomotif') {
+                document.getElementById('namaGuru').value = "Budi Santoso, S.T.";
+                document.getElementById('mapel').value = "Pemeliharaan Mesin Sepeda Motor";
+                document.getElementById('topik').value = "Diagnosis & Overhaul Sistem Bahan Bakar Injeksi (EFI/PGM-FI)";
+                document.getElementById('kelas').value = "Kelas 11 (Fase F)";
+                document.getElementById('semester').value = "Genap";
+                document.getElementById('tipeSoal').value = "Pilihan Ganda (5 Opsi A-E)";
+                document.getElementById('cpInput').value = "Peserta didik mampu melakukan diagnosis gangguan sistem bahan bakar injeksi, mengukur tekanan pompa bahan bakar, serta melakukan perbaikan komponen injektor sesuai SOP industri.";
+                showToast("Preset Teknik Otomotif dimuat!", "info");
+            } else if (type === 'tkj') {
+                document.getElementById('namaGuru').value = "Siti Rahma, S.Kom.";
+                document.getElementById('mapel').value = "Pemrograman Web dan Perangkat Bergerak";
+                document.getElementById('topik').value = "Pengembangan RESTful API & Integrasi Front-End Async";
+                document.getElementById('kelas').value = "Kelas 12 (Fase F)";
+                document.getElementById('semester').value = "Ganjil";
+                document.getElementById('tipeSoal').value = "Pilihan Ganda (5 Opsi A-E)";
+                document.getElementById('cpInput').value = "Peserta didik mampu merancang dan membangun arsitektur REST API, mengelola autentikasi token JWT, serta mengintegrasikannya dengan aplikasi web interaktif.";
+                showToast("Preset RPL/TKJ dimuat!", "info");
+            }
+        }
+
+        // Custom Toast Helper
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const bgClass = type === 'error' ? 'bg-rose-600 text-white' : (type === 'success' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-white');
+            const icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'success' ? 'fa-circle-check' : 'fa-circle-info');
+            
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            // Remove after 3.5s
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Improved Markdown Renderer fixing Numbering Issue
+        function renderMarkdown(md) {
+            let html = md;
+            
+            // Code Blocks
+            html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            
+            // Headers
+            html = html.replace(/^### (.*$)/gim, '<h3 class="text-base font-bold text-slate-700 mt-4 mb-2">$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2 class="text-lg font-bold text-slate-800 mt-5 mb-2 border-b pb-1">$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold text-slate-900 mt-6 mb-3 border-b-2 border-slate-300 pb-2">$1</h1>');
+            
+            // Bold & Italic
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Tables (Basic Parsing)
+            html = html.replace(/^\|(.+)\|$/gim, function(match) {
+                const cells = match.split('|').filter(c => c.trim() !== '');
+                if (match.includes('---')) return ''; // Ignore header divider line
+                return '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
+            });
+            html = html.replace(/(<tr>[\s\S]*?<\/tr>)/g, '<table>$1</table>');
+            html = html.replace(/<\/table>\s*<table>/g, ''); // merge tables
+
+            // Preserve Sequential Question Numbers (Avoid resetting to 1)
+            // Parse numbered lists as paragraph blocks with bold numbers instead of strictly <ol>
+            html = html.replace(/^(\d+)\.\s+(.*$)/gim, '<p class="mt-3 font-normal"><strong class="font-bold">$1.</strong> $2</p>');
+
+            // Unordered Lists / Bullet points
+            html = html.replace(/^\s*[\-\*]\s+(.*$)/gim, '<ul class="list-disc ml-6 my-1"><li>$1</li></ul>');
+            html = html.replace(/<\/ul>\s*<ul>/g, ''); // merge lists
+
+            // Line breaks & Paragraphs
+            html = html.replace(/\n\n/g, '<br><br>');
+            html = html.replace(/\n/g, '<br>');
+
+            return html;
+        }
+
+        // Auto Generate CP with AI
+        async function autoGenerateCP() {
+            const mapel = document.getElementById('mapel').value.trim();
+            const topik = document.getElementById('topik').value.trim();
+            const kelas = document.getElementById('kelas').value;
+            const cpInput = document.getElementById('cpInput');
+            const btnAuto = document.getElementById('btnAutoCP');
+
+            if (!mapel || !topik) {
+                showToast("Harap isi Mata Pelajaran dan Topik Materi terlebih dahulu!", "error");
+                return;
+            }
+
+            btnAuto.disabled = true;
+            btnAuto.classList.add('opacity-50');
+            cpInput.value = "⌛ Sedang menyusun Capaian Pembelajaran & Indikator dari AI...";
+
+            const promptCP = `Sebagai pakar Kurikulum Merdeka SMK, buatkan 1 pernyataan Capaian Pembelajaran (CP) dan 2 Indikator Asesmen yang spesifik dan terukur untuk:
+- Mata Pelajaran: ${mapel}
+- Tingkat/Fase: ${kelas}
+- Topik Materi: ${topik}
+
+Jawab dengan ringkas (maksimal 3-4 kalimat). Langsung pada teks hasil tanpa kata pengantar.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptCP }] }]
+                    })
+                });
+
+                const data = await response.json();
+                if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                    cpInput.value = data.candidates[0].content.parts[0].text.trim();
+                    showToast("CP Berhasil di-generate!", "success");
+                } else {
+                    cpInput.value = "";
+                    showToast("Gagal mendeteksi CP. Periksa koneksi Anda.", "error");
+                }
+            } catch (e) {
+                cpInput.value = "";
+                showToast("Terjadi kesalahan: " + e.message, "error");
+            } finally {
+                btnAuto.disabled = false;
+                btnAuto.classList.remove('opacity-50');
+            }
+        }
+
+        // Main Function: Generate Soal
+        async function generateSoal() {
+            const namaGuru = document.getElementById('namaGuru').value.trim();
+            const kelas = document.getElementById('kelas').value;
+            const semester = document.getElementById('semester').value;
+            const mapel = document.getElementById('mapel').value.trim();
+            const topik = document.getElementById('topik').value.trim();
+            const cpInput = document.getElementById('cpInput').value.trim();
+            const tipeSoal = document.getElementById('tipeSoal').value;
+            const kesulitan = document.getElementById('kesulitan').value;
+            const jumlah = document.getElementById('jumlah').value;
+
+            const emptyState = document.getElementById('emptyState');
+            const loadingState = document.getElementById('loadingState');
+            const hasilRender = document.getElementById('hasilRender');
+            const controls = document.getElementById('outputControls');
+
+            if (!namaGuru || !mapel || !topik) {
+                showToast("Nama Guru, Mata Pelajaran, dan Topik Wajib diisi!", "error");
+                return;
+            }
+
+            // Update UI State to Loading
+            emptyState.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            hasilRender.classList.add('hidden');
+            controls.classList.add('opacity-50', 'pointer-events-none');
+
+            // Update Print Meta Header
+            document.getElementById('printGuru').innerText = `Guru Pengampu: ${namaGuru}`;
+            document.getElementById('printMapel').innerText = `Mata Pelajaran: ${mapel}`;
+            document.getElementById('printKelas').innerText = `Kelas/Sem: ${kelas} (${semester})`;
+
+            const promptSoal = `Anda adalah Tim Pengembang Kurikulum dan Pembuat Asesmen Vokasi SMK di SMKN 1 Sengah Temila.
+Buatkan dokumen Perangkat Asesmen Pembelajaran Lengkap dan Siap Cetak berstandar Kurikulum Merdeka.
+
+DETAIL INPUT:
+- Sekolah: SMKN 1 Sengah Temila
+- Guru Pengampu / Penyusun: ${namaGuru}
+- Mata Pelajaran: ${mapel}
+- Tingkat / Semester: ${kelas} - ${semester}
+- Topik / Materi: ${topik}
+- Capaian Pembelajaran & Indikator: ${cpInput || 'Sesuaikan dengan topik'}
+- Bentuk Soal: ${tipeSoal}
+- Tingkat Kesulitan: ${kesulitan}
+- Jumlah Soal: ${jumlah} item
+
+ATURAN PERFORMA PENULISAN SOAL (SANGAT PENTING):
+1. PENOMORAN SOAL BERURUTAN: Soal HARUS diberi nomor yang berurutan secara eksplisit dari nomor 1 sampai nomor ${jumlah} (Contoh: "1. Soal...", "2. Soal...", "3. Soal...", dan seterusnya hingga nomor ${jumlah}). DILARANG KERAS mereset nomor atau mengulang nomor 1 pada setiap soal!
+2. DISTRIBUSI OPSI JAWABAN BENAR HARUS WAJIB MERATA: Untuk tipe Pilihan Ganda (opsi A, B, C, D, E), letak kunci jawaban BENAR HARUS TERDISTRIBUSI DENGAN SANGAT MERATA DAN ACAK DI ANTARA OPTION A, B, C, D, DAN E dari total ${jumlah} soal yang dibuat (Perhitungan: Kuota setiap huruf kunci jawaban = Total Soal / 5. Contoh: jika 50 soal, maka opsi A=10, B=10, C=10, D=10, E=10 secara acak). DILARANG MENUMPUK jawaban benar pada 1 atau 2 huruf saja!
+
+SUSUN DOKUMEN DENGAN STRUKTUR BERIKUT (Gunakan Format Markdown Rapi):
+
+# 1. KISI-KISI ASESMEN
+Buat tabel Markdown sederhana berisi kolom: (No | Indikator Soal | Bentuk Soal | Level Kognitif [C2-C6]).
+
+# 2. NASKAH SOAL SISWA
+(Sediakan bagian naskah bersih tanpa kunci jawaban, siap diberikan kepada siswa SMK).
+- Sertakan instruksi pengerjaan.
+- Tuliskan nomor soal secara eksplisit dan berurutan dari 1 sampai ${jumlah}.
+- Untuk Pilihan Ganda, tampilkan 5 opsi (A, B, C, D, E) untuk tiap nomor.
+- Buat soal berbasis studi kasus dunia kerja / industri vokasi yang relevan.
+
+# 3. KUNCI JAWABAN & PEMBAHASAN DETIL
+Tampilkan tabel rekapitulasi kunci jawaban dari nomor 1 sampai ${jumlah} (pastikan proporsi A, B, C, D, E terbagi rata presisi) serta berikan pembahasannya.
+
+# 4. PEDOMAN PENSKORAN & RUBRIK PENILAIAN
+Berikan rumus perhitungan nilai akhir (Skor Perolehan / Skor Maksimal x 100) dan Kriteria Ketuntasan (KKTP).`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptSoal }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                    const rawMarkdown = data.candidates[0].content.parts[0].text;
+                    
+                    // Render HTML
+                    hasilRender.innerHTML = renderMarkdown(rawMarkdown);
+                    hasilRender.setAttribute('data-raw', rawMarkdown); // Store raw text for copying
+                    
+                    loadingState.classList.add('hidden');
+                    hasilRender.classList.remove('hidden');
+                    controls.classList.remove('opacity-50', 'pointer-events-none');
+                    
+                    showToast("Naskah Asesmen berhasil dibuat!", "success");
+                } else {
+                    throw new Error("Respon API tidak valid.");
+                }
+
+            } catch (error) {
+                loadingState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                showToast("Gagal memproses: " + error.message, "error");
+            }
+        }
+
+        // Download Word (.doc) Function
+        function downloadWord() {
+            const namaGuru = document.getElementById('namaGuru').value.trim() || "Guru";
+            const mapel = document.getElementById('mapel').value.trim() || "Asesmen";
+            const kelas = document.getElementById('kelas').value || "";
+            const contentHtml = document.getElementById('hasilRender').innerHTML;
+
+            if (!contentHtml) {
+                showToast("Tidak ada dokumen untuk diunduh!", "error");
+                return;
+            }
+
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' 
+                xmlns:w='urn:schemas-microsoft-com:office:word' 
+                xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset='utf-8'>
+                    <title>Asesmen - SMKN 1 Sengah Temila</title>
+                    <style>
+                        body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.5; color: #1e293b; }
+                        h1 { font-size: 16pt; color: #0f172a; border-bottom: 2px solid #cbd5e1; padding-bottom: 4px; margin-top: 18pt; font-weight: bold; }
+                        h2 { font-size: 13pt; color: #334155; margin-top: 14pt; font-weight: bold; border-bottom: 1px solid #e2e8f0; }
+                        h3 { font-size: 11pt; color: #475569; font-weight: bold; margin-top: 10pt; }
+                        table { width: 100%; border-collapse: collapse; margin: 12pt 0; }
+                        th, td { border: 1px solid #94a3b8; padding: 6pt 8pt; text-align: left; font-size: 10pt; }
+                        th { background-color: #f1f5f9; font-weight: bold; }
+                        ul, ol { margin-left: 18pt; }
+                        p { margin-bottom: 6pt; }
+                        .kop { text-align: center; border-bottom: 3px double #000; padding-bottom: 8pt; margin-bottom: 16pt; }
+                        .kop h3 { margin: 0; font-size: 11pt; text-transform: uppercase; border: none; font-weight: bold; }
+                        .kop h1 { margin: 2pt 0; font-size: 15pt; text-transform: uppercase; border: none; font-weight: bold; }
+                        .kop p { margin: 1pt 0; font-size: 9pt; }
+                        .meta-info { margin-bottom: 12pt; font-size: 10pt; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="kop">
+                        <h3>PEMERINTAH PROVINSI KALIMANTAN BARAT</h3>
+                        <h3>DINAS PENDIDIKAN DAN KEBUDAYAAN</h3>
+                        <h1>SMK NEGERI 1 SENGAH TEMILA</h1>
+                        <p>Jl. Raya Senakin, Dsn. Gundaleng Alian, Kec. Sengah Temila, Kab. Landak, Kode pos. 79356</p>
+                        <p>Email: smkn1sengahtemilakablandak@gmail.com, web: http://smkn1sengahtemila.sch.id</p>
+                    </div>
+                    <div class="meta-info">
+                        <p>Guru Pengampu: ${namaGuru}</p>
+                        <p>Mata Pelajaran: ${mapel}</p>
+                        <p>Kelas/Semester: ${kelas}</p>
+                    </div>
+                    ${contentHtml}
+                </body>
+                </html>`;
+
+            const blob = new Blob(['\ufeff', header], {
+                type: 'application/msword'
+            });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Asesmen_${mapel.replace(/[^a-zA-Z0-9]/g, '_')}_${kelas.replace(/[^a-zA-Z0-9]/g, '_')}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast("File Word (.doc) berhasil diunduh!", "success");
+        }
+
+        // Copy Result Function
+        function copyHasil() {
+            const hasilRender = document.getElementById('hasilRender');
+            const textToCopy = hasilRender.getAttribute('data-raw') || hasilRender.innerText;
+            
+            if (!textToCopy) return;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast("Teks naskah berhasil disalin ke clipboard!", "success");
+            } catch (err) {
+                showToast("Gagal menyalin teks.", "error");
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Print Document Function
+        function cetakDokumen() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
